@@ -10,7 +10,7 @@ import { ConfigService } from "@nestjs/config";
 export class UsersService {
     private readonly saltRounds: number;
     constructor(private readonly prisma: PrismaService, private configService: ConfigService) {
-        this.saltRounds = this.configService.get<number>('HASH_SALT_ROUNDS', 10)
+        this.saltRounds = this.configService.get<number>('HASH_SALT_ROUNDS',10)
     }
 
     async create(createUserDto: CreateUserDto): Promise<Users> {
@@ -22,7 +22,7 @@ export class UsersService {
                 throw new BadRequestException('Email is already taken');
             }
             // hash password
-            const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+            const hashedPassword = await bcrypt.hash(password, +this.saltRounds);
             return await this.prisma.users.create({
                 data: {
                     name,
