@@ -19,3 +19,10 @@ model Users {
   email    String @unique @db.VarChar(45)
   password String @db.VarChar(100)
 }
+
+model Items {
+  id          Int      @id @default(autoincrement()) 
+  title       String
+  description String
+  timestamp   DateTime @default(now())              
+}
