@@ -1,13 +1,17 @@
 import { PrismaService } from "src/prisma.service";
 import { Users } from "./users.model";
 import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
-import { CreateUserDto } from "src/dto/create-user.dto";
+import { CreateUserDto } from "src/dto/users/create-user.dto";
 import * as bcrypt from "bcryptjs"
-import { LoginUserDto } from "src/dto/login-user.dto";
+import { LoginUserDto } from "src/dto/users/login-user.dto";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class UsersService {
-    constructor(private readonly prisma: PrismaService) { }
+    private readonly saltRounds: number;
+    constructor(private readonly prisma: PrismaService, private configService: ConfigService) {
+        this.saltRounds = this.configService.get<number>('HASH_SALT_ROUNDS', 10)
+    }
 
     async create(createUserDto: CreateUserDto): Promise<Users> {
         try {
@@ -18,8 +22,8 @@ export class UsersService {
                 throw new BadRequestException('Email is already taken');
             }
             // hash password
-            const hashedPassword = await bcrypt.hash(password, 10);
-            return this.prisma.users.create({
+            const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+            return await this.prisma.users.create({
                 data: {
                     name,
                     email,
