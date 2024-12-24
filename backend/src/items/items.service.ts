@@ -26,6 +26,12 @@ export class ItemsService {
     }
     async update(id: number, updateItemDto: UpdateItemDto): Promise<Items> {
         try {
+            const item =   await this.prisma.items.findUnique({
+                where: { id }
+            });
+            if (!item) {
+                throw new NotFoundException("Item not found");
+            }
             const { title, description } = updateItemDto;
 
             const updatedItem = await this.prisma.items.update({
@@ -35,14 +41,12 @@ export class ItemsService {
                     ...(description && { description }),
                 }
             });
-            if (!updatedItem) {
-                throw new NotFoundException("Item not found");
-            }
+
             return updatedItem;
 
         } catch (error) {
             console.error(`error from update item: ,${error}`);
-            throw new InternalServerErrorException('An unexpected error occurred during update item.');
+            throw new InternalServerErrorException(`${error.message}`);
         }
     }
     async findAll(): Promise<Items[]> {
