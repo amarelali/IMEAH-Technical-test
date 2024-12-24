@@ -21,10 +21,10 @@ export class ItemsService {
             });
         } catch (error) {
             console.error(`error from create new item: ,${error}`);
-            throw new InternalServerErrorException('An unexpected error occurred during creating new Item.');
+            throw new InternalServerErrorException(`${error.message}`);
         }
     }
-    async update(id:number, updateItemDto: UpdateItemDto): Promise<Items> {
+    async update(id: number, updateItemDto: UpdateItemDto): Promise<Items> {
         try {
             const { title, description } = updateItemDto;
 
@@ -50,22 +50,25 @@ export class ItemsService {
             return await this.prisma.items.findMany();
         } catch (error) {
             console.error(`error from findAll items: ,${error}`);
-            throw new InternalServerErrorException('An unexpected error occurred during find all items.');
+            throw new InternalServerErrorException(`${error.message}`);
         }
     }
 
     async delete(id: number) {
         try {
+            const item = await this.prisma.items.findUnique({
+                where: { id }
+            });
+            if (!item) {
+                throw new NotFoundException("Item not found");
+            }
             const deletedItem = await this.prisma.items.delete({
                 where: { id }
             });
-            if (!deletedItem) {
-                throw new NotFoundException("Item not found");
-            }
-            return deletedItem;
+            return { data: deletedItem, message: 'Item deleted successfully' };
         } catch (error) {
             console.error(`error from deleteItem: ,${error}`);
-            throw new InternalServerErrorException('An unexpected error occurred during delete item.')
+            throw new InternalServerErrorException(`${error.message}`)
         }
 
     }

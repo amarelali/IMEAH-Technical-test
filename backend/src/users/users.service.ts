@@ -32,7 +32,7 @@ export class UsersService {
             });
         } catch (error) {
             console.error(`error: ,${error}`);
-            throw new InternalServerErrorException('An unexpected error occurred during registration.');
+            throw new InternalServerErrorException(`${error.message}`);
         }
     }
     async login(loginUserDto: LoginUserDto): Promise<Partial<Users>> {
@@ -53,7 +53,7 @@ export class UsersService {
             return userWithoutPassword;
         } catch (error) {
             console.error(`error: ,${error}`);
-            throw new InternalServerErrorException('An unexpected error occurred during login.');
+            throw new InternalServerErrorException(`${error.message}`);
         }
     }
 }
