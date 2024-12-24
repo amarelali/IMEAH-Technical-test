@@ -14,15 +14,28 @@ datasource db {
 }
 
 model Users {
-  id       Int    @id @default(autoincrement())
-  name     String @db.VarChar(100)
-  email    String @unique @db.VarChar(45)
-  password String @db.VarChar(100)
+  id       Int          @id @default(autoincrement())
+  name     String       @db.VarChar(100)
+  email    String       @unique @db.VarChar(45)
+  password String       @db.VarChar(100)
+  items    user_items[]
 }
 
 model Items {
-  id          Int      @id @default(autoincrement()) 
+  id          Int          @id @default(autoincrement())
   title       String
   description String
-  timestamp   DateTime @default(now())              
+  timestamp   DateTime     @default(now())
+  users       user_items[]
+}
+
+model user_items {
+  id     Int @id @default(autoincrement())
+  userId Int
+  itemId Int
+
+  user Users? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Items? @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId], name: "userId_itemId")
 }
