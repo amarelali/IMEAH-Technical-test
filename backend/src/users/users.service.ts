@@ -10,12 +10,15 @@ import { ConfigService } from "@nestjs/config";
 export class UsersService {
     private readonly saltRounds: number;
     constructor(private readonly prisma: PrismaService, private configService: ConfigService) {
-        this.saltRounds = this.configService.get<number>('HASH_SALT_ROUNDS',10)
+        this.saltRounds = this.configService.get<number>('HASH_SALT_ROUNDS', 10)
     }
 
     async create(createUserDto: CreateUserDto): Promise<Users> {
         try {
             const { name, email, password } = createUserDto;
+            if (!name || !email || !password) {
+                throw new BadRequestException('Check required fields')
+            }
             //check if user already exist
             const existingUser = await this.prisma.users.findUnique({ where: { email } });
             if (existingUser) {
@@ -23,6 +26,7 @@ export class UsersService {
             }
             // hash password
             const hashedPassword = await bcrypt.hash(password, +this.saltRounds);
+
             return await this.prisma.users.create({
                 data: {
                     name,
