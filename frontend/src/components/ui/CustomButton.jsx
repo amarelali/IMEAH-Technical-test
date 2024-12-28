@@ -1,8 +1,8 @@
 import { Button } from "@mui/material";
 import PropTypes from "prop-types";
 
-const CustomButton = ({ onSubmit, isLoading = false, children }) => {
-    return (<Button variant="contained" onClick={onSubmit} className="h-12">
+const CustomButton = ({ onClick, isLoading = false, children, rest={} }) => {
+    return (<Button onClick={onClick} className="h-12" {...rest} variant= "outlined">
         <span className="flex justify-center items-center">
             {isLoading && (
                 <svg
@@ -32,9 +32,10 @@ const CustomButton = ({ onSubmit, isLoading = false, children }) => {
 };
 
 CustomButton.propTypes = {
-    onSubmit: PropTypes.func.isRequired,
+    onClick: PropTypes.func.isRequired,
     isLoading: PropTypes.bool,
     children: PropTypes.node.isRequired,
+    rest: PropTypes.object,
 };
 
 export default CustomButton;

@@ -7,10 +7,11 @@ import Grid from "@mui/material/Grid2";
 import io from "socket.io-client";
 import { CustomDialog } from "../components/ui/CustomDialog";
 import { useSelector } from "react-redux";
+import CustomButton from "../components/ui/CustomButton";
 const Dashboard = () => {
 
     const { isLoggedIn, user } = useSelector((state) => state.auth);
-
+    const [isLoading, setIsLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false); // State to manage dialog open/close
     const [item, setItem] = useState({ title: "", description: "" }); // State for new item
     const [items, setItems] = useState([]);
@@ -55,6 +56,7 @@ const Dashboard = () => {
     //
     const handleUpdateItem = async () => {
         try {
+            setIsLoading(true);
             const response = await axios.put(`http://localhost:3000/items/${currentItem.id}`, item);
             console.log("Item updated:", response.data);
             setItems((prevItems) => {
@@ -66,9 +68,11 @@ const Dashboard = () => {
                 });
                 return newArray;
             });
+            setIsLoading(false);
             setItem({ title: "", description: "" }); // Reset form
             setOpenDialog(false); // Close the dialog
         } catch (error) {
+            setIsLoading(false);
             console.error("Error creating item:", error);
         }
     };
@@ -111,12 +115,8 @@ const Dashboard = () => {
                     />
                 </DialogTitle>
                 <DialogActions>
-                    <Button onClick={handleDialogClose} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={currentItem ? handleUpdateItem : handleCreateItem} color="primary">
-                        {currentItem ? "Update" : "Create"}
-                    </Button>
+                    <CustomButton onClick={handleDialogClose} rest={{ "color": "#9289a3" }}> Cancel </CustomButton>
+                    <CustomButton onClick={currentItem ? handleUpdateItem : handleCreateItem} isLoading={isLoading} rest={{ "color": "primary" }} > {currentItem ? "Update" : "Create"}</CustomButton>
                 </DialogActions>
             </CustomDialog>
             <Box sx={{ maxWidth: 600, margin: "auto", padding: 2 }}>
@@ -148,14 +148,10 @@ const Dashboard = () => {
                                         </Typography>
                                         {/* Update button for each item */}
                                         <Box width={"fullWidth"}>
-                                            <Button
-                                                variant="outlined"
-                                                color="secondary"
-                                                onClick={() => { handleDialogOpen(item); }} // Pass the item to edit
-                                                sx={{ marginTop: 1 }}
-                                            >
+                                            <CustomButton
+                                                onClick={() => { handleDialogOpen(item); }}>
                                                 Update
-                                            </Button>
+                                            </CustomButton>
                                         </Box>
                                     </CardContent>
                                 </Card>
