@@ -3,8 +3,12 @@ import PropTypes from "prop-types";
 import CustomButton from "./ui/CustomButton";
 import { useState } from "react";
 import axiosInstance from "../config/axios.config";
-
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../features/auth/authSlice';
 export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
+    const dispatch = useDispatch();
+    const { isLoggedIn, user } = useSelector((state) => state.auth);
+
     const [formData, setFormData] = useState({
         ...defaultState
     });
@@ -21,7 +25,7 @@ export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
     const validateForm = () => {
         let isValid = true;
         const newErrors = {};
-        fields.forEach(({name,required,validation,validationMessage}) => {
+        fields.forEach(({ name, required, validation, validationMessage }) => {
             newErrors[name] = "";
             if (required && !formData[name].trim() && !new RegExp(validation).test(formData[name])) {
                 newErrors[name] = validationMessage;
@@ -31,7 +35,8 @@ export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
         setErrors(newErrors);
         return isValid;
     };
-
+    console.log("isLoggedIn", isLoggedIn);
+    console.log("user", user);
     const onSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) {
@@ -48,7 +53,8 @@ export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
                     location.replace("/dashboard");
                 }, 1000);
                 setFormData(defaultState);
-            }else {
+                dispatch(login(data));
+            } else {
                 alert(`Error: ${data.message || "Something went wrong"}`);
             }
         } catch (err) {

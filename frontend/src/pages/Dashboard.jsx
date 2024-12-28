@@ -1,12 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { Card, CardContent, Typography } from "@mui/material";
+import { Button, Card, CardContent, DialogActions, DialogTitle, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
-
+import io from "socket.io-client";
+import { CustomDialog } from "../components/ui/CustomDialog";
+import { useSelector } from "react-redux";
 const Dashboard = () => {
+
+    const { isLoggedIn, user } = useSelector((state) => state.auth);
+
+    const [openDialog, setOpenDialog] = useState(false); // State to manage dialog open/close
+    const [item, setItem] = useState({ title: "", description: "" }); // State for new item
     const [items, setItems] = useState([]);
+    const [currentItem, setCurrentItem] = useState(null);
 
     // Fetch items from the backend
     useEffect(() => {
@@ -21,14 +29,104 @@ const Dashboard = () => {
         };
 
         fetchItems();
+
     }, []);
+
+    // Handle input changes for the new item
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setItem((prevItem) => ({
+            ...prevItem,
+            [name]: value,
+        }));
+    };
+
+    // Handle submitting the new item form
+    const handleCreateItem = async () => {
+        try {
+            const response = await axios.post("http://localhost:3000/items", item);
+            setItems((prevItems) => [...prevItems, response.data]);
+            setItem({ title: "", description: "" }); // Reset form
+            setOpenDialog(false); // Close the dialog
+        } catch (error) {
+            console.error("Error creating item:", error);
+        }
+    };
+    //
+    const handleUpdateItem = async () => {
+        try {
+            const response = await axios.put(`http://localhost:3000/items/${currentItem.id}`, item);
+            console.log("Item updated:", response.data);
+            setItems((prevItems) => {
+                const newArray = prevItems.map((prevItem) => {
+                    if (prevItem.id === currentItem.id) {
+                        return { ...prevItem, ...item }
+                    }
+                    return prevItem
+                });
+                return newArray;
+            });
+            setItem({ title: "", description: "" }); // Reset form
+            setOpenDialog(false); // Close the dialog
+        } catch (error) {
+            console.error("Error creating item:", error);
+        }
+    };
+
+    // Handle opening and closing the dialog
+    const handleDialogOpen = (item = null) => {
+        if (item) {
+            setCurrentItem(item);
+            setItem({ title: item.title, description: item.description });
+        } else {
+            setCurrentItem(null);
+            setItem({ title: "", description: "" });
+        }
+        setOpenDialog(true);
+    };
+    const handleDialogClose = () => { setOpenDialog(false); setTimeout(() => { setCurrentItem(null) }, 100) }
 
     return (
         <>
+            <CustomDialog title={currentItem ? "Update Item" : "Create a New Item"} isOpened={openDialog} onClose={handleDialogClose}>
+                <DialogTitle>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Title"
+                        fullWidth
+                        variant="outlined"
+                        name="title"
+                        value={item.title}
+                        onChange={handleInputChange}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Description"
+                        fullWidth
+                        variant="outlined"
+                        name="description"
+                        value={item.description}
+                        onChange={handleInputChange}
+                    />
+                </DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={currentItem ? handleUpdateItem : handleCreateItem} color="primary">
+                        {currentItem ? "Update" : "Create"}
+                    </Button>
+                </DialogActions>
+            </CustomDialog>
             <Box sx={{ maxWidth: 600, margin: "auto", padding: 2 }}>
                 <Typography variant="h4" gutterBottom>
                     Items List
                 </Typography>
+                {/* Button to open the "Create Item" dialog */}
+                <Button variant="contained" color="primary" onClick={() => handleDialogOpen()} sx={{ marginBottom: 2 }}>
+                    Create Item
+                </Button>
                 <Box sx={{ flexGrow: 1 }}>
                     <Grid
                         container
@@ -45,9 +143,20 @@ const Dashboard = () => {
                                         <Typography variant="body1" color="text.secondary" paragraph>
                                             {item.description}
                                         </Typography>
-                                        <Typography variant="caption" color="text.secondary">
+                                        <Typography variant="caption" color="text.secondary" >
                                             {new Date(item.timestamp).toLocaleString()}
                                         </Typography>
+                                        {/* Update button for each item */}
+                                        <Box width={"fullWidth"}>
+                                            <Button
+                                                variant="outlined"
+                                                color="secondary"
+                                                onClick={() => { handleDialogOpen(item); }} // Pass the item to edit
+                                                sx={{ marginTop: 1 }}
+                                            >
+                                                Update
+                                            </Button>
+                                        </Box>
                                     </CardContent>
                                 </Card>
                             </Grid>
