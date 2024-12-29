@@ -5,12 +5,15 @@ import axios from "axios";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import { CustomDialog } from "../components/ui/CustomDialog";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import CustomButton from "../components/ui/CustomButton";
 import { toast } from 'react-toastify';
+import { useSelector } from "react-redux";
 
 
 const Dashboard = () => {
+    const { user } = useSelector((state) => state.auth);
+
     const [isLoading, setIsLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false); // State to manage dialog open/close
     const [item, setItem] = useState({ title: "", description: "" }); // State for new item
@@ -96,6 +99,7 @@ const Dashboard = () => {
 
     return (
         <>
+            <Typography variant="h5" style={{ padding: 5 }}>Welcome, {user.name}</Typography>
             <CustomDialog title={currentItem ? "Update Item" : "Create a New Item"} isOpened={openDialog} onClose={handleDialogClose}>
                 <DialogTitle>
                     <TextField
@@ -138,7 +142,7 @@ const Dashboard = () => {
                         columns={{ xs: 4, sm: 8, md: 12 }}
                     >
                         {items.map((item, index) => (
-                            <Grid key={index} size={{ xs: 2, sm: 4, md: 4 }}>
+                            <Grid key={index} size={{ xs: 2, sm: 4, md: 4, }}>
                                 <Card sx={{ minHeight: 150 }}>
                                     <CardContent>
                                         <Typography variant="h6" color="primary" gutterBottom>

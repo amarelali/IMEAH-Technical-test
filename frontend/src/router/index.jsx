@@ -7,6 +7,7 @@ import {
 import Auth from "../pages/Auth/Auth"
 import PageNotFound from "../pages/PageNotFound";
 import Dashboard from "../pages/dashboard";
+import Header from "../components/Header";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -19,7 +20,10 @@ const router = createBrowserRouter(
       <Route
         path="/dashboard"
         element={
-          <Dashboard />
+          <>
+            <Header />
+            <Dashboard />
+          </>
         }
       />
       <Route path="*" element={<PageNotFound />} />
