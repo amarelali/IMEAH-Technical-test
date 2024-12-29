@@ -51,7 +51,11 @@ export class ItemsService {
     }
     async findAll(): Promise<Items[]> {
         try {
-            return await this.prisma.items.findMany();
+            return await this.prisma.items.findMany({
+                orderBy: {
+                    id: 'asc', 
+                },
+            });
         } catch (error) {
             console.error(`error from findAll items: ,${error}`);
             throw new InternalServerErrorException(`${error.message}`);

@@ -7,12 +7,10 @@ import { UserItemsModule } from './user_items/user_items.module';
 @Module({
   imports: [UsersModule,
     ConfigModule.forRoot({
-      isGlobal: true, 
+      isGlobal: true,
     }),
     ItemsModule,
     UserItemsModule
   ],
-  controllers: [],
-  providers: [],
 })
-export class AppModule {}
+export class AppModule { }
