@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button, Card, CardContent, DialogActions, DialogTitle, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
-import io from "socket.io-client";
 import { CustomDialog } from "../components/ui/CustomDialog";
 import { useSelector } from "react-redux";
 import CustomButton from "../components/ui/CustomButton";
-const Dashboard = () => {
+import { toast } from 'react-toastify';
 
-    const { isLoggedIn, user } = useSelector((state) => state.auth);
+
+const Dashboard = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false); // State to manage dialog open/close
     const [item, setItem] = useState({ title: "", description: "" }); // State for new item
@@ -46,10 +46,12 @@ const Dashboard = () => {
     const handleCreateItem = async () => {
         try {
             const response = await axios.post("http://localhost:3000/items", item);
+            toast.success('Item created successfully!')
             setItems((prevItems) => [...prevItems, response.data]);
             setItem({ title: "", description: "" }); // Reset form
             setOpenDialog(false); // Close the dialog
         } catch (error) {
+            toast.error("Error creating successfully");
             console.error("Error creating item:", error);
         }
     };
@@ -58,6 +60,7 @@ const Dashboard = () => {
         try {
             setIsLoading(true);
             const response = await axios.put(`http://localhost:3000/items/${currentItem.id}`, item);
+            toast.success("Item updated successfully");
             console.log("Item updated:", response.data);
             setItems((prevItems) => {
                 const newArray = prevItems.map((prevItem) => {
@@ -73,7 +76,8 @@ const Dashboard = () => {
             setOpenDialog(false); // Close the dialog
         } catch (error) {
             setIsLoading(false);
-            console.error("Error creating item:", error);
+            toast.error("Error updating item");
+            console.error("Error updating item:", error);
         }
     };
 

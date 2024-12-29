@@ -5,6 +5,8 @@ import { useState } from "react";
 import axiosInstance from "../config/axios.config";
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../features/auth/authSlice';
+import { toast } from 'react-toastify';
+
 export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
     const dispatch = useDispatch();
     const { isLoggedIn, user } = useSelector((state) => state.auth);
@@ -46,7 +48,7 @@ export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
             setIsLoading(true);
             const { data, status } = await axiosInstance.post(apiEndPoint, formData);
             if (status == 201) {
-                alert("User LoggedIn Successfully");
+                toast.success('User LoggedIn Successfully');
                 console.log(`data ${data}`);
                 setIsLoading(false);
                 setTimeout(() => {
@@ -55,7 +57,7 @@ export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
                 setFormData(defaultState);
                 dispatch(login(data));
             } else {
-                alert(`Error: ${data.message || "Something went wrong"}`);
+                toast.error(`Error: ${data.message || "Something went wrong"}`);
             }
         } catch (err) {
             setIsLoading(false);
@@ -64,26 +66,28 @@ export const AuthForm = ({ fields, defaultState, title, apiEndPoint }) => {
     }
 
     return (
-        <form>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    {fields.map(({ name, label, variant, type }) => (
-                        <TextField
-                            key={name}
-                            name={name}
-                            label={label}
-                            variant={variant}
-                            type={type}
-                            value={formData[name]}
-                            error={Boolean(errors[name])}
-                            onChange={onChangeInputValue}
-                            helperText={errors[name] || ""}
-                        />
-                    ))}
+        <>
+            <form>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {fields.map(({ name, label, variant, type }) => (
+                            <TextField
+                                key={name}
+                                name={name}
+                                label={label}
+                                variant={variant}
+                                type={type}
+                                value={formData[name]}
+                                error={Boolean(errors[name])}
+                                onChange={onChangeInputValue}
+                                helperText={errors[name] || ""}
+                            />
+                        ))}
+                    </Box>
+                    <CustomButton onClick={onSubmit} isLoading={isLoading}>{title}</CustomButton>
                 </Box>
-                <CustomButton onSubmit={onSubmit} isLoading={isLoading}>{title}</CustomButton>
-            </Box>
-        </form>
+            </form>
+        </>
     );
 }
 
