@@ -6,7 +6,7 @@ import {
 
 import Auth from "../pages/Auth/Auth"
 import PageNotFound from "../pages/PageNotFound";
-import Dashboard from "../pages/dashboard";
+import Dashboard from "../pages/Dashboard";
 import Header from "../components/Header";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 const user = localStorage.getItem("user");
